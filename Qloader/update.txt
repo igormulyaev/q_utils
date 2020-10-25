@@ -1,25 +1,30 @@
 ﻿Bot:
 
-WindowViewModel / StartUp
+WindowViewModel.StartUp
 Убрать всё от начала до this.SettingsControl()
 Убрать всё после this.SettingsControl() до MainHelper.ShowPage(new MainPage());
 
-WindowViewModel / Close
+WindowViewModel.Close
 Убрать await account.LogOut(AccountType.Normal);
 
-App / Main
+App.Main
 Убрать new SplashScreen("resources/startlogo.png").Show(true);
 
 
 Flash:
 
-WindowViewModel / StartUp
+WindowViewModel.StartUp
 Убрать от GlobalSettings.GetInstance(); до this.SettingsControl();
 Убрать от this.SettingsControl(); до MainHelper.ShowPage(new LoginPage());
 
-WindowViewModel / Close
+WindowViewModel.Close
 Убрать await account.LogOut(AccountType.Normal);
 
-App / Main
+App.Main
 Убрать new SplashScreen("resources/flash400x400.png").Show(true);
 
+
+Holder:
+
+MainWindowViewModel.OnLoad
+Убрать всё
