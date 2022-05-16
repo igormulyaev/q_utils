@@ -22,7 +22,7 @@
 
 Убрать всё после
 
-    this.SettingsControl()
+    windowViewModel.SettingsControl();
 до
 
     MainHelper.ShowPage(new MainPage());
@@ -70,6 +70,14 @@
 Убрать от
 
     awaiter = Authentication.CheckFlash(windowViewModel.Usb).GetAwaiter();
+до
+
+    windowViewModel.SettingsControl();
+
+Убрать всё после
+
+    windowViewModel.SettingsControl();
+
 до
 
     MainHelper.ShowPage(new LoginPage());
