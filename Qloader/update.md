@@ -46,6 +46,10 @@
 
     new SplashScreen("resources/startlogo.png").Show(true);
 
+## Client.Client
+После new HttpClient добавить строку
+System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+(в обоих конструкторах)
 
 # Flash
 
@@ -101,6 +105,11 @@
 Убрать
     
     new SplashScreen("resources/flash400x400.png").Show(true);
+
+## Client.Client
+После new HttpClient добавить строку
+System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+(в обоих конструкторах)
 
 # Holder
 
