@@ -1,3 +1,6 @@
 ﻿*.exe
 *.dll
-Newtonsoft.Json.xml
+Newtonsoft.*
+Loaded/*
+qBotRunner/bin/*
+qBotRunner/obj/*
