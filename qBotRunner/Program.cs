@@ -98,6 +98,7 @@ namespace qBotRunner
             // Set file name
             ((ValuePattern)fileNameComboBox.GetCurrentPattern(ValuePattern.Pattern)).SetValue(filename);
 
+            Thread.Sleep(500);
             AutomationElement openButton = openDialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Open"));
             if (null == openButton) throw new Exception("Open button not found");
             
