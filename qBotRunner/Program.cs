@@ -27,31 +27,32 @@ namespace qBotRunner
                 
                 AutomationElement mainWindow = GetMainWindow(bot);
 
-                AutomationElement rootPane = mainWindow.FindFirst(
-                    TreeScope.Children
-                    , new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Pane)
-                );
+                AutomationElement rootPane = mainWindow.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Pane));
+                if (null == rootPane) throw new Exception("Root pane not found");
                 
-                AutomationElement loadButton  = rootPane.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Load accounts list"));
+                AutomationElement loadButton = rootPane.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Load accounts list"));
+                if (null == loadButton) throw new Exception("Load accounts list button not found");
+
                 AutomationElement startButton = rootPane.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Start all"));
-                
-                // Click "Load accounts list" button
+                if (null == startButton) throw new Exception("Start all button not found");
+
+                Console.WriteLine("Click \"Load accounts list\" button");
                 ((InvokePattern)loadButton.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
                 
-                Thread.Sleep(500);
+                Thread.Sleep(1000);
                 
                 ApplyInputFile(mainWindow, accountsFile);
 
-                // Wait for the accounts loading
                 bool stillWaiting = true;
                 do
                 {
                     Thread.Sleep(1000);
+                    Console.WriteLine("Waiting for the accounts loading");
                     stillWaiting = !(Boolean)startButton.GetCurrentPropertyValue(AutomationElement.IsEnabledProperty);
                 }
                 while(stillWaiting);
                 
-                // Click "Start all" button
+                Console.WriteLine("Click \"Start all\" button");
                 ((InvokePattern)startButton.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
                 
             } 
@@ -68,7 +69,8 @@ namespace qBotRunner
             for (int i = 0; i < 5; ++i)
             {
                 Thread.Sleep(1000);
-
+                Console.WriteLine("Waiting for the main window");
+                
                 AutomationElement mainWindow = desktop.FindFirst(TreeScope.Children, new AndCondition(
                     new PropertyCondition(AutomationElement.NameProperty, "MainWindow")
                     , new PropertyCondition(AutomationElement.ProcessIdProperty, bot.Id)
@@ -79,7 +81,7 @@ namespace qBotRunner
                 }
             }
             
-            throw new Exception("BotQually main window not found");
+            throw new Exception("Main window not found");
         }
         // ----------------------------------------------------------------
         private static void ApplyInputFile (AutomationElement mainWindow, string filename)
