@@ -97,14 +97,16 @@ namespace qBotRunner
             );
             if (null == fileNameComboBox) throw new Exception("File name combobox not found");
             
-            // Set file name
+            Console.WriteLine("Apply accounts list file to \"File name\" combobox");
             ((ValuePattern)fileNameComboBox.GetCurrentPattern(ValuePattern.Pattern)).SetValue(filename);
 
             Thread.Sleep(500);
             AutomationElement openButton = openDialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Open"));
             if (null == openButton) throw new Exception("Open button not found");
             
-            // Click Open button
+            PrintAllPatterns(openButton);
+
+            Console.WriteLine("Click \"Open\" button");
             ((InvokePattern)openButton.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
         }
         // ----------------------------------------------------------------
@@ -116,6 +118,15 @@ namespace qBotRunner
                 string? name = child.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString();
                 string type = ((ControlType)child.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty)).ProgrammaticName;
                 Console.WriteLine($"type = \"{type}\", name = \"{name}\"");
+            }
+        }
+        // ----------------------------------------------------------------
+        private static void PrintAllPatterns(AutomationElement element)
+        {
+            Console.WriteLine($"Available patterns of \"{element.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString()}\" element:");
+            foreach (AutomationPattern p in element.GetSupportedPatterns())
+            {
+                Console.WriteLine($"ProgrammaticName: \"{p.ProgrammaticName}\", PatternName: \"{Automation.PatternName(p)}\"");
             }
         }
     }
