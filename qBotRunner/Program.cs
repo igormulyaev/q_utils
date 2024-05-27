@@ -106,8 +106,16 @@ namespace qBotRunner
             
             PrintAllPatterns(openButton);
 
+            InvokePattern? openClick = null;
+            do
+            {
+                Thread.Sleep(1000);
+                Console.WriteLine("Waiting for InvokePattern");
+                openClick = (InvokePattern)openButton.GetCurrentPattern(InvokePattern.Pattern);
+            } while (null == openClick);
+
             Console.WriteLine("Click \"Open\" button");
-            ((InvokePattern)openButton.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
+            openClick.Invoke();
         }
         // ----------------------------------------------------------------
         private static void PrintChildren (AutomationElement element)
