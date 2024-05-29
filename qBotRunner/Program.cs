@@ -104,16 +104,13 @@ namespace qBotRunner
             AutomationElement openButton = openDialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Open"));
             if (null == openButton) throw new Exception("Open button not found");
             
-            PrintAllPatterns(openButton);
-
-            InvokePattern? openClick = null;
-            do
+            while (openButton.GetSupportedPatterns().Length == 0)
             {
+                Console.WriteLine("Waiting for InvokePattern for \"Open\" button");
                 Thread.Sleep(1000);
-                Console.WriteLine("Waiting for InvokePattern");
-                openClick = (InvokePattern)openButton.GetCurrentPattern(InvokePattern.Pattern);
-            } while (null == openClick);
-
+            }
+            InvokePattern openClick = (InvokePattern)openButton.GetCurrentPattern(InvokePattern.Pattern);
+            
             Console.WriteLine("Click \"Open\" button");
             openClick.Invoke();
         }
