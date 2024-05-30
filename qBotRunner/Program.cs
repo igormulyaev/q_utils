@@ -9,8 +9,15 @@ namespace qBotRunner
     { 
         static void Main(string[] args) 
         { 
+            Console.WriteLine("Run arguments:");
+            foreach(var arg in args)
+            {
+                Console.WriteLine(arg);
+            }
+                
             if (args.Length == 2)
             {
+                Console.WriteLine("Run bot");
                 RunBot(args[0], args[1]);
             }
             else
@@ -89,6 +96,9 @@ namespace qBotRunner
             AutomationElement openDialog = mainWindow.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Open"));
             if (null == openDialog) throw new Exception("Open dialog not found");
 
+            Console.WriteLine("Open dialog's children tree:");
+            PrintChildrenTree(openDialog);
+
             AutomationElement fileNameComboBox = openDialog.FindFirst(TreeScope.Children
                 , new AndCondition(
                     new PropertyCondition(AutomationElement.NameProperty, "File name:")
@@ -100,9 +110,21 @@ namespace qBotRunner
             Console.WriteLine("Apply accounts list file to \"File name\" combobox");
             ((ValuePattern)fileNameComboBox.GetCurrentPattern(ValuePattern.Pattern)).SetValue(filename);
 
-            Thread.Sleep(500);
-            AutomationElement openButton = openDialog.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Open"));
-            if (null == openButton) throw new Exception("Open button not found");
+            PrintChildrenTree(openDialog);
+            
+            AutomationElement? openButton = null; 
+            do
+            {
+                Console.WriteLine("Waiting for \"Open\" button");
+                Thread.Sleep(1000);
+            
+                openButton = openDialog.FindFirst(TreeScope.Children
+                    , new AndCondition(
+                        new PropertyCondition(AutomationElement.NameProperty, "Open")
+                        , new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button)
+                    )
+                );
+            } while (openButton == null);
             
             while (openButton.GetSupportedPatterns().Length == 0)
             {
@@ -115,14 +137,15 @@ namespace qBotRunner
             openClick.Invoke();
         }
         // ----------------------------------------------------------------
-        private static void PrintChildren (AutomationElement element)
+        private static void PrintChildrenTree (AutomationElement element, string indent = "")
         {
-            Console.WriteLine($"Children of {element.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString()}:");
+            //Console.WriteLine($"Children of {element.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString()}:");
             foreach (AutomationElement child in element.FindAll(TreeScope.Children, Condition.TrueCondition)) 
             {
                 string? name = child.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString();
                 string type = ((ControlType)child.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty)).ProgrammaticName;
-                Console.WriteLine($"type = \"{type}\", name = \"{name}\"");
+                Console.WriteLine($"{indent}type = \"{type}\", name = \"{name}\"");
+                PrintChildrenTree(child, indent + "    ");
             }
         }
         // ----------------------------------------------------------------
