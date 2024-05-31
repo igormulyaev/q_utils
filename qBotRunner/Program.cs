@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Diagnostics;
-using System.Windows.Automation; 
+using System.Windows.Automation;
 
 namespace qBotRunner 
 { 
@@ -43,13 +43,16 @@ namespace qBotRunner
                 AutomationElement startButton = rootPane.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Start all"));
                 if (null == startButton) throw new Exception("Start all button not found");
 
-                Console.WriteLine("Click \"Load accounts list\" button");
-                ((InvokePattern)loadButton.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
+                do
+                {
+                    Thread.Sleep(1000);
+                    
+                    Console.WriteLine("Click \"Load accounts list\" button");
+                    ((InvokePattern)loadButton.GetCurrentPattern(InvokePattern.Pattern)).Invoke();
                 
-                Thread.Sleep(1000);
+                    Thread.Sleep(1000);
+                } while (!ApplyInputFile(mainWindow, accountsFile));
                 
-                ApplyInputFile(mainWindow, accountsFile);
-
                 bool stillWaiting = true;
                 do
                 {
@@ -91,13 +94,13 @@ namespace qBotRunner
             throw new Exception("Main window not found");
         }
         // ----------------------------------------------------------------
-        private static void ApplyInputFile (AutomationElement mainWindow, string filename)
+        private static bool ApplyInputFile (AutomationElement mainWindow, string filename)
         {
             AutomationElement openDialog = mainWindow.FindFirst(TreeScope.Children, new PropertyCondition(AutomationElement.NameProperty, "Open"));
             if (null == openDialog) throw new Exception("Open dialog not found");
 
-            Console.WriteLine("Open dialog's children tree:");
-            PrintChildrenTree(openDialog);
+            Console.WriteLine("Open dialog's children 1:");
+            PrintChildren(openDialog);
 
             AutomationElement fileNameComboBox = openDialog.FindFirst(TreeScope.Children
                 , new AndCondition(
@@ -110,36 +113,48 @@ namespace qBotRunner
             Console.WriteLine("Apply accounts list file to \"File name\" combobox");
             ((ValuePattern)fileNameComboBox.GetCurrentPattern(ValuePattern.Pattern)).SetValue(filename);
 
-            PrintChildrenTree(openDialog);
+            Thread.Sleep(1000);
+
+            Console.WriteLine("Open dialog's children 2:");
+            PrintChildren(openDialog);
+
+            Console.WriteLine("Search for \"Open\" button");
+            AutomationElement? openButton = openDialog.FindFirst(TreeScope.Children
+                , new AndCondition(
+                    new PropertyCondition(AutomationElement.NameProperty, "Open")
+                    , new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button)
+                )
+            );
             
-            AutomationElement? openButton = null; 
-            do
+            if (openButton == null)
             {
-                Console.WriteLine("Waiting for \"Open\" button");
-                Thread.Sleep(1000);
-            
-                openButton = openDialog.FindFirst(TreeScope.Children
+                Console.WriteLine("\"Open\" button not found");
+
+                AutomationElement? cancelButton = openDialog.FindFirst(TreeScope.Children
                     , new AndCondition(
-                        new PropertyCondition(AutomationElement.NameProperty, "Open")
+                        new PropertyCondition(AutomationElement.NameProperty, "Cancel")
                         , new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button)
                     )
                 );
-            } while (openButton == null);
+
+                if (cancelButton == null) throw new Exception("Cancel buton not found");
+                
+                InvokePattern cancelClick = (InvokePattern)cancelButton.GetCurrentPattern(InvokePattern.Pattern);
             
-            while (openButton.GetSupportedPatterns().Length == 0)
-            {
-                Console.WriteLine("Waiting for InvokePattern for \"Open\" button");
-                Thread.Sleep(1000);
+                Console.WriteLine("Click \"Cancel\" button");
+                cancelClick.Invoke();    
+                return false;
             }
+            
             InvokePattern openClick = (InvokePattern)openButton.GetCurrentPattern(InvokePattern.Pattern);
             
             Console.WriteLine("Click \"Open\" button");
             openClick.Invoke();
+            return true;
         }
         // ----------------------------------------------------------------
         private static void PrintChildrenTree (AutomationElement element, string indent = "")
         {
-            //Console.WriteLine($"Children of {element.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString()}:");
             foreach (AutomationElement child in element.FindAll(TreeScope.Children, Condition.TrueCondition)) 
             {
                 string? name = child.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString();
@@ -155,6 +170,23 @@ namespace qBotRunner
             foreach (AutomationPattern p in element.GetSupportedPatterns())
             {
                 Console.WriteLine($"ProgrammaticName: \"{p.ProgrammaticName}\", PatternName: \"{Automation.PatternName(p)}\"");
+            }
+        }
+        // ----------------------------------------------------------------
+        private static void PrintChildren(AutomationElement element, string indent = "")
+        {
+            Condition cond = (indent == "") 
+                ? new PropertyCondition(AutomationElement.NameProperty, "Open")
+                : Condition.TrueCondition;
+            foreach (AutomationElement child in element.FindAll(TreeScope.Children, cond)) 
+            {
+                string? name = child.GetCurrentPropertyValue(AutomationElement.NameProperty).ToString();
+                string type = ((ControlType)child.GetCurrentPropertyValue(AutomationElement.ControlTypeProperty)).ProgrammaticName;
+                Console.WriteLine($"{indent}name = \"{name}\", type = \"{type}\"");
+                if (name == "Open")
+                {
+                    PrintChildren(child, indent + "    ");
+                }
             }
         }
     }
