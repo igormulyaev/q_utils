@@ -46,6 +46,20 @@
 
     new SplashScreen("resources/startlogo.png").Show(true);
 
+## Автоматизация загрузки аккаунтов MainViewModel.LoadAccountsFromFile
+Убрать всё, относящееся к dialog. 
+
+Добавить строку
+
+    string FileName = "qBotAccounts.xml";
+
+Заменить
+    dialog.FileName
+
+на
+
+    FileName
+    
 ## Client.Client
 После new HttpClient добавить строку
 System.Net.ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
